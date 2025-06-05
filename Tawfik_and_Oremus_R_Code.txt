@@ -1,0 +1,113 @@
+# Libraries
+library(readxl)
+library(procs)
+library(ggplot2)
+library(ggpubr)
+library(ggjournals)
+
+
+# Import and modify data
+dat <- read_excel("reg_data_060225.xlsx")
+
+dat$ROB <- factor(dat$ROB, levels = c('High', 'Some', 'Low')) # order for descriptive analyses
+dat$REGION <- factor(dat$REGION, levels = c('1', '2')) # order for regression: 1 = other, 2 = asia
+dat$CONSORT <- factor(dat$CONSORT, levels = c('0', '1')) # order for regression: 0 = no, 1 = yes
+dat$FUNDING <- factor(dat$FUNDING, levels = c('0', '1')) # order for regression: 0 = no, 1 = yes
+
+
+# Descriptive data for index score
+proc_means(
+  dat, var = INDX,
+  stats = c("n", "mean", "std", "p25", "p50", "p75"),
+  output = c("report"),
+  title = "Index Overall"
+)
+
+proc_means(
+  dat, var = INDX,
+  stats = c("n", "mean", "std", "p25", "p50", "p75"),
+  output = c("report"),
+  class = ROB,
+  title = "Index by RoB"
+)
+
+
+# Kruskall-Wallis
+kruskal.test(INDX ~ ROB, data = dat) 
+
+
+# Figure 4
+f4 <- gghistogram(
+  dat,
+  x = "INDX",
+  y = "count",
+  color = "gray50",
+  fill = "gray50",
+  linetype = "solid",
+  alpha = 0.5,
+  bins = 7,
+  binwidth = NULL,
+  title = NULL,
+  xlab = "Index",
+  ylab = "Articles (n)",
+  position = position_identity()
+) + theme_nejm()
+
+
+# Regression
+m.f1 <- lm(INDX ~ REGION + YEAR + IMPACT + CONSORT, data = dat)
+summary(m.f1)
+confint(m.f1)
+
+#######################################################################################################################
+
+# Supplemental file 4
+sf4 <- read_excel("reg_data_060225.xlsx")
+
+sf4$ROB <- factor(sf3$ROB, levels = c("Low", "Some", "High"))
+
+# graph
+ggboxplot(
+  sf4,
+  x = "ROB",
+  y = "INDX",
+  color = "ROB",
+  palette = c("#800026", "#e31a1c", "#fd8d3c"),
+  xlab = "Risk of Bias",
+  ylab = "Index Score",
+  bxp.errorbar.width = 0.4,
+  linetype = "solid",
+  add = "jitter",
+  add.params = list(),
+  error.plot = "pointrange",
+  label = NULL,
+  font.label = list(size = 11, color = "black"),
+  label.select = NULL,
+  repel = FALSE,
+  label.rectangle = FALSE,
+  ggtheme = theme_pubr(),
+) + theme(legend.position = "none")
+
+#######################################################################################################################
+
+# Figure 5
+df <- read_excel("Figure_5.xlsx")
+df$Review <- factor(df$review, levels = c('Tawfik and Oremus', 'de Morais et al.', 'Sirikal et al.'),
+                    labels = c('Tawfik and Oremus', 'de Moraes et al.', 'Sirikul et al.'))
+# convert grouping variable to factor and fix spelling errors in dataset
+
+# table
+D1 <- c("0.75")
+D2 <- c("0.53")
+D3 <- c("0.90")
+D4 <- c("0.85")
+D5 <- c("0.81")
+Overall <- c("0.36")
+table <- data.frame(D1 = D1, D2 = D2, D3 = D3, D4 = D4, D5 = D5, Overall = Overall)
+
+f5 -
+ggplot(df) + geom_bar(aes(x = domain, y = prop, fill = Review), position = position_dodge(preserve = 'single'),
+                    stat = 'identity', width = 0.5) + coord_flip() + theme_nejm() +
+  ylab("Proportion of Low Risk of Bias Trials") + xlab("Cochrane Risk of Bias 2 Domain") +
+  annotate(geom = 'table', x = 6.2, y = 1, label = list(table)) +
+  annotate(geom = 'text', x = 6.35, y = 0.83, label = "Overall Proportion of Low Risk of Bias Trials")
