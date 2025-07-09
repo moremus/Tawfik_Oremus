@@ -7,7 +7,7 @@ library(ggjournals)
 
 
 # Import and modify data
-dat <- read_excel("reg_data_060225.xlsx")
+dat <- read_excel("reg_data_070825.xlsx")
 
 dat$ROB <- factor(dat$ROB, levels = c('High', 'Some', 'Low')) # order for descriptive analyses
 dat$REGION <- factor(dat$REGION, levels = c('1', '2')) # order for regression: 1 = other, 2 = asia
@@ -48,10 +48,10 @@ f4 <- gghistogram(
   bins = 7,
   binwidth = NULL,
   title = NULL,
-  xlab = "Index",
+  xlab = "Index Score",
   ylab = "Articles (n)",
   position = position_identity()
-) + theme_nejm()
+) + theme_nejm() + scale_x_continuous(limits = c(0.0, 1.0), breaks = seq(0.0, 1.0, 0.25))
 
 
 # Regression
@@ -62,7 +62,7 @@ confint(m.f1)
 #######################################################################################################################
 
 # Supplemental file 4
-sf4 <- read_excel("reg_data_060225.xlsx")
+sf4 <- read_excel("reg_data_070825.xlsx")
 
 sf4$ROB <- factor(sf3$ROB, levels = c("Low", "Some", "High"))
 
@@ -97,10 +97,10 @@ df$Review <- factor(df$review, levels = c('Tawfik and Oremus', 'de Morais et al.
 # convert grouping variable to factor and fix spelling errors in dataset
 
 # table
-D1 <- c("0.75")
+D1 <- c("0.78")
 D2 <- c("0.53")
-D3 <- c("0.90")
-D4 <- c("0.85")
+D3 <- c("0.91")
+D4 <- c("0.84")
 D5 <- c("0.81")
 Overall <- c("0.36")
 table <- data.frame(D1 = D1, D2 = D2, D3 = D3, D4 = D4, D5 = D5, Overall = Overall)
